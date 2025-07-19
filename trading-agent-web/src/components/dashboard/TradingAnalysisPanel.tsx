@@ -55,7 +55,7 @@ const TradingAnalysisPanel: React.FC<TradingAnalysisPanelProps> = ({ selectedSym
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/trading/analysis/${selectedSymbol}`);
+        const response = await fetch(`/api/analysis?symbol=${selectedSymbol}`);
         const result = await response.json();
         
         if (result.success) {
