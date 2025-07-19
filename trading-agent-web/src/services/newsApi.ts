@@ -12,8 +12,8 @@ export interface NewsResponse {
   totalResults: number;
 }
 
-// 后端API基础URL
-const API_BASE_URL = 'http://localhost:5000/api';
+// 后端API基础URL - 使用相对路径，适用于生产和开发环境
+const API_BASE_URL = '/api';
 
 export const fetchCryptoNews = async (symbol?: string): Promise<NewsItem[]> => {
   try {
