@@ -16,11 +16,42 @@ const sampleData = {
 };
 
 /**
+ * 在 Vercel serverless 环境中查找 analysis_results 目录
+ */
+async function findAnalysisDir() {
+  const possiblePaths = [
+    path.join(process.cwd(), 'analysis_results'),
+    path.join(process.cwd(), '..', 'analysis_results'),
+    'analysis_results',
+    '../analysis_results',
+    './analysis_results'
+  ];
+  
+  for (const testPath of possiblePaths) {
+    try {
+      await fs.access(testPath);
+      console.log('Found analysis directory at:', testPath);
+      return testPath;
+    } catch {
+      continue;
+    }
+  }
+  
+  console.error('Analysis directory not found. Tried paths:', possiblePaths);
+  return null;
+}
+
+/**
  * 查找指定符号的最新分析文件
  */
 async function findLatestAnalysisFile(symbol, analysisDir) {
+  if (!analysisDir) {
+    return null;
+  }
+
   try {
     const files = await fs.readdir(analysisDir);
+    console.log(`Files in analysis directory: ${files.join(', ')}`);
     
     // 查找所有匹配的日期文件
     const dateFiles = files
@@ -44,6 +75,7 @@ async function findLatestAnalysisFile(symbol, analysisDir) {
       .sort((a, b) => b.timestamp - a.timestamp);
 
     if (dateFiles.length > 0) {
+      console.log(`Found date file for ${symbol}: ${dateFiles[0].filename}`);
       return dateFiles[0];
     }
 
@@ -51,6 +83,7 @@ async function findLatestAnalysisFile(symbol, analysisDir) {
     const analysisFile = path.join(analysisDir, `${symbol}_analysis.json`);
     try {
       await fs.access(analysisFile);
+      console.log(`Found analysis file for ${symbol}: ${symbol}_analysis.json`);
       return {
         filename: `${symbol}_analysis.json`,
         date: 'latest',
@@ -58,6 +91,7 @@ async function findLatestAnalysisFile(symbol, analysisDir) {
         path: analysisFile
       };
     } catch {
+      console.log(`No analysis file found for ${symbol}`);
       return null;
     }
   } catch (error) {
@@ -107,10 +141,33 @@ export default async function handler(req, res) {
       });
     }
 
-    // 处理所有分析查询
-    if (urlPath === '/api/trading/analysis') {
-      const analysisDir = path.join(process.cwd(), 'analysis_results');
-      const analyses = {};
+    // Debug endpoint
+    if (urlPath === '/api/trading/debug') {
+      const analysisDir = await findAnalysisDir();
+      let files = [];
+      let error = null;
+      
+      if (analysisDir) {
+        try {
+          files = await fs.readdir(analysisDir);
+        } catch (err) {
+          error = err.message;
+        }
+      }
+      
+      return res.status(200).json({
+        cwd: process.cwd(),
+        analysisDir,
+        files,
+        error,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+              // 处理所有分析查询
+     if (urlPath === '/api/trading/analysis') {
+       const analysisDir = await findAnalysisDir();
+       const analyses = {};
       
       for (const symbol of supportedSymbols) {
         const latestFile = await findLatestAnalysisFile(symbol, analysisDir);
@@ -176,7 +233,7 @@ export default async function handler(req, res) {
         });
       }
 
-      const analysisDir = path.join(process.cwd(), 'analysis_results');
+             const analysisDir = await findAnalysisDir();
       const latestFile = await findLatestAnalysisFile(symbol, analysisDir);
       
       if (latestFile) {
