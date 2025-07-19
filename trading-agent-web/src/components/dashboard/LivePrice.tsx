@@ -5,27 +5,13 @@ interface LivePriceProps {
   crypto: string;
 }
 
-interface CryptoData {
-  id: string;
-  symbol: string;
-  name: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  last_updated: string;
-}
+
 
 const LivePrice: React.FC<LivePriceProps> = ({ crypto }) => {
   const [price, setPrice] = useState<number | null>(null);
   const [change24h, setChange24h] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // 币种ID映射
-  const cryptoIds = {
-    BTC: 'bitcoin',
-    ETH: 'ethereum',
-    SOL: 'solana'
-  };
 
   // 获取实时价格数据
   useEffect(() => {

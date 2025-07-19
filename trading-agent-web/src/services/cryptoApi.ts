@@ -273,7 +273,7 @@ export const fetchChartData = async (
     if (response.ok) {
       const data: CoinCapHistory = await response.json();
 
-      return data.data.map((point, index) => {
+      return data.data.map((point) => {
         const price = parseFloat(point.priceUsd);
         const volume = parseFloat(point.circulatingSupply) * price;
         
