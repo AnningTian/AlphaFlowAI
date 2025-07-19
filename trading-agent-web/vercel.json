@@ -8,6 +8,12 @@
     },
     "api/news.js": {
       "maxDuration": 30
+    },
+    "api/coingecko.js": {
+      "maxDuration": 30
+    },
+    "api/coincap.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
