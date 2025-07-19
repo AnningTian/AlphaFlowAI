@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    // 开发环境代理配置
     proxy: {
       '/api/trading': {
         target: 'http://localhost:5000',
@@ -28,5 +29,11 @@ export default defineConfig({
         }
       }
     }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    chunkSizeWarningLimit: 1600
   }
 })
